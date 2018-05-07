@@ -2,6 +2,7 @@ package com.revolut.test.web;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.revolut.test.exception.IncorrectRequestDataException;
 import com.revolut.test.exception.MoneyTransferException;
 import com.revolut.test.exception.NotEnoughMoneyException;
 import com.revolut.test.service.AccountService;
@@ -39,6 +40,7 @@ public class AccountController {
         exception(JsonSyntaxException.class, jsonSyntaxExceptionHandler);
         exception(MoneyTransferException.class, moneyTransferExceptionHandler);
         exception(NotEnoughMoneyException.class, notEnoughMoneyExceptionHandler);
+        exception(IncorrectRequestDataException.class, incorrectRequestDataExceptionHandler);
     }
 
     private Route transferRoute = (request, response)

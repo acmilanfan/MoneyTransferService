@@ -116,6 +116,23 @@ public class AccountControllerTest {
         assertThat(asString(response.body()), containsString(TRANSFERRING_MONEY_ERROR_DESCRIPTION));
     }
 
+    @Test
+    public void shouldBeErrorWhenRequestDataIncorrect() throws HttpClientException {
+        // given
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setFromAccountId(2L);
+        transferRequest.setToAccountId(1L);
+
+        PutMethod put = testServer.put(MONEY_TRANSFER_PATH, gson.toJson(transferRequest), false);
+
+        // when
+        HttpResponse response = testServer.execute(put);
+
+        // then
+        assertThat(response.code(), is(SC_BAD_REQUEST));
+        assertThat(asString(response.body()), containsString(INCORRECT_REQUEST_DATA_ERROR_DESCRIPTION));
+    }
+
     private String asString(byte[] body) {
         return new String(body);
     }

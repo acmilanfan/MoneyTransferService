@@ -1,5 +1,6 @@
 package com.revolut.test.service;
 
+import com.revolut.test.exception.IncorrectRequestDataException;
 import com.revolut.test.exception.MoneyTransferException;
 import com.revolut.test.exception.NotEnoughMoneyException;
 import com.revolut.test.model.Account;
@@ -89,6 +90,50 @@ public class AccountServiceTest {
 
         doThrow(RuntimeException.class)
                 .when(accountService).changeBalance(accountFrom, accountTo, transferRequest.getAmount());
+
+        // when
+        accountService.moneyTransfer(transferRequest);
+    }
+
+    @Test(expected = IncorrectRequestDataException.class)
+    public void shouldThrowIncorrectRequestDataExceptionWhenAmountIsNull() {
+        // given
+        Account accountFrom = Account.of(9L, BigDecimal.valueOf(100));
+        accountRepository.save(accountFrom);
+        Account accountTo = Account.of(10L, BigDecimal.valueOf(100));
+        accountRepository.save(accountTo);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setFromAccountId(accountFrom.getId());
+        transferRequest.setToAccountId(accountTo.getId());
+
+        // when
+        accountService.moneyTransfer(transferRequest);
+    }
+
+
+    @Test(expected = IncorrectRequestDataException.class)
+    public void shouldThrowIncorrectRequestDataExceptionWhenAccountIsNull() {
+        // given
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setFromAccountId(Long.MAX_VALUE);
+        transferRequest.setToAccountId(Long.MAX_VALUE - 1);
+
+        // when
+        accountService.moneyTransfer(transferRequest);
+    }
+
+    @Test(expected = IncorrectRequestDataException.class)
+    public void shouldThrowIncorrectRequestDataExceptionWhenAccountBalanceIsNull() {
+        // given
+        Account accountFrom = Account.of(11L, null);
+        accountRepository.save(accountFrom);
+        Account accountTo = Account.of(12L, BigDecimal.valueOf(100));
+        accountRepository.save(accountTo);
+
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setFromAccountId(accountFrom.getId());
+        transferRequest.setToAccountId(accountTo.getId());
 
         // when
         accountService.moneyTransfer(transferRequest);

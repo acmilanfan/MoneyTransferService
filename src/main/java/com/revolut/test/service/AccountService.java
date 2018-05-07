@@ -1,5 +1,6 @@
 package com.revolut.test.service;
 
+import com.revolut.test.exception.IncorrectRequestDataException;
 import com.revolut.test.exception.MoneyTransferException;
 import com.revolut.test.exception.NotEnoughMoneyException;
 import com.revolut.test.model.Account;
@@ -7,6 +8,8 @@ import com.revolut.test.repository.AccountRepository;
 import com.revolut.test.web.json.TransferRequest;
 
 import java.math.BigDecimal;
+
+import static java.util.Objects.isNull;
 
 /**
  * Service for working with accounts.
@@ -32,6 +35,7 @@ public class AccountService {
         Account to = accountRepository.findOneById(transferRequest.getToAccountId());
         BigDecimal amount = transferRequest.getAmount();
 
+        checkRequestData(from, to, amount);
         checkAvailableMoney(from, amount);
 
         BigDecimal fromBalance = from.getBalance();
@@ -45,6 +49,20 @@ public class AccountService {
         }
 
         return OK_RESPONSE;
+    }
+
+    private void checkRequestData(Account from, Account to, BigDecimal amount) {
+        if (isDataNotCorrect(from, to, amount)) {
+            throw new IncorrectRequestDataException();
+        }
+    }
+
+    private boolean isDataNotCorrect(Account from, Account to, BigDecimal amount) {
+        return isNullOrHasNullBalance(from) || isNullOrHasNullBalance(to) || isNull(amount);
+    }
+
+    private boolean isNullOrHasNullBalance(Account account) {
+        return isNull(account) || isNull(account.getBalance());
     }
 
     private void checkAvailableMoney(Account from, BigDecimal amount) {
